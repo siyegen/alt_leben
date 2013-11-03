@@ -48,6 +48,20 @@ Q.component("drtControls", {
       p.vy = p.speed;
     }
 
+    if(Q.inputs['fire']) {
+      var stage = Q.stage();
+      stage.insert(new Q.Pew({ x: p.x+55, y: p.y}));
+    }
+
+  }
+});
+
+Q.Sprite.extend('Pew',{
+  init: function(p) {
+    this._super(p, { sheet: "enemy", vx:800});
+  },
+  step: function(dt) {
+    this.p.x += this.p.vx * dt;
   }
 });
 
@@ -56,7 +70,6 @@ Q.Sprite.extend("Player",{
     this._super(p, { sheet: "player", x: 210, y: 190, vx: 0, vy: 0 });
     this.add('2d, drtControls');
     this._vel = 0;
-    //this._start = 
 
     this.on("hit.sprite",function(collision) {
       if(collision.obj.isA("Tower")) {
@@ -79,19 +92,17 @@ Q.Sprite.extend("Tower", {
 
 Q.Sprite.extend("Enemy",{
   init: function(p) {
-    this._super(p, { sheet: 'enemy', vx: 80 });
+    this._super(p, { sheet: 'enemy'});
     this.add('2d, aiBounce');
 
-    this.on("bump.left,bump.right,bump.bottom",function(collision) {
+    this.on("bump.left,bump.right,bump.bottom,bump.top",function(collision) {
       if(collision.obj.isA("Player")) { 
         Q.stageScene("endGame",1, { label: "You Died" }); 
         collision.obj.destroy();
       }
-    });
-
-    this.on("bump.top",function(collision) {
-      if(collision.obj.isA("Player")) { 
+      if(collision.obj.isA("Pew")) { 
         this.destroy();
+        collision.obj.destroy();
         collision.obj.p.vy = -300;
       }
     });
@@ -102,7 +113,11 @@ Q.scene("level1",function(stage) {
   stage.collisionLayer(new Q.TileLayer({ dataAsset: 'kyle_level.json', sheet: 'tiles' }));
 
   for( var i=0; i < 50; i++) {
-    stage.insert(new Q.Enemy({ x: 600+i+95, y: 100+i+90}));
+    stage.insert(new Q.Enemy({ x: 600+i+95, y: 100+i+90, vx: 80*Math.random()}));
+  }
+
+  for( var i=0; i < 50; i++) {
+    stage.insert(new Q.Enemy({ x: 1200+i+95, y: 500+i+90, vx: 1000*Math.random()}));
   }
   var player = stage.insert(new Q.Player());
 
