@@ -5,10 +5,58 @@ var Q = Quintus()
         .setup({ maximize: true })
         .controls().touch();
 
+Q.gravityX = 0;
+Q.gravityY = 0;
+
+Q.component("drtControls", {
+  defaults: {
+    speed: 200,
+    kyle_speed: 1000,
+    min_speed: 400
+  },
+
+  added: function() {
+    var p = this.entity.p;
+
+    Q._defaults(p,this.defaults);
+
+    this.entity.on("step",this,"step");
+    //this.entity.on("bump.bottom",this,"landed");
+
+    p.landed = 0;
+    p.direction ='right';
+  },
+
+  step: function(dt) {
+    var p = this.entity.p;
+
+    if(Q.inputs['right']) {
+      p.direction = 'right';
+      p.vx = p.kyle_speed;
+    } else if (!Q.inputs['up'] || Q.inputs['down']) {
+      p.direction = 'right';
+      temp = p.vx - p.kyle_speed/5;
+      if (temp < 0) { temp = p.min_speed; }
+      p.vx = temp;
+    }
+
+    if(Q.inputs['up']) {
+      p.vy = -p.speed;
+      p.direction = 'up';
+    } else if(Q.inputs['down']) {
+      p.direction = 'down';
+      p.vy = p.speed;
+    }
+
+  }
+});
+
 Q.Sprite.extend("Player",{
   init: function(p) {
-    this._super(p, { sheet: "player", x: 410, y: 90 });
-    this.add('2d, platformerControls');
+    this._super(p, { sheet: "player", x: 210, y: 190, vx: 0, vy: 0 });
+    this.add('2d, drtControls');
+    this._vel = 0;
+    //this._start = 
 
     this.on("hit.sprite",function(collision) {
       if(collision.obj.isA("Tower")) {
@@ -16,6 +64,10 @@ Q.Sprite.extend("Player",{
         this.destroy();
       }
     });
+  },
+  step: function(dt) {
+    this.p.vx += 0.15;
+    this.p.x += this.p.vx * dt;
   }
 });
 
@@ -27,7 +79,7 @@ Q.Sprite.extend("Tower", {
 
 Q.Sprite.extend("Enemy",{
   init: function(p) {
-    this._super(p, { sheet: 'enemy', vx: 100 });
+    this._super(p, { sheet: 'enemy', vx: 80 });
     this.add('2d, aiBounce');
 
     this.on("bump.left,bump.right,bump.bottom",function(collision) {
@@ -47,13 +99,14 @@ Q.Sprite.extend("Enemy",{
 });
 
 Q.scene("level1",function(stage) {
-  stage.collisionLayer(new Q.TileLayer({ dataAsset: 'level.json', sheet: 'tiles' }));
+  stage.collisionLayer(new Q.TileLayer({ dataAsset: 'kyle_level.json', sheet: 'tiles' }));
+
+  for( var i=0; i < 50; i++) {
+    stage.insert(new Q.Enemy({ x: 600+i+95, y: 100+i+90}));
+  }
   var player = stage.insert(new Q.Player());
 
   stage.add("viewport").follow(player);
-
-  stage.insert(new Q.Enemy({ x: 700, y: 0 }));
-  stage.insert(new Q.Enemy({ x: 800, y: 0 }));
 
   stage.insert(new Q.Tower({ x: 180, y: 50 }));
 });
@@ -74,9 +127,9 @@ Q.scene('endGame',function(stage) {
   box.fit(20);
 });
 
-Q.load("sprites.png, sprites.json, level.json, tiles.png", function() {
+Q.load("kyle_sprites.png, sprites.json, kyle_level.json, tiles.png", function() {
   Q.sheet("tiles","tiles.png", { tilew: 32, tileh: 32 });
-  Q.compileSheets("sprites.png","sprites.json");
+  Q.compileSheets("kyle_sprites.png","sprites.json");
   Q.stageScene("level1");
   console.log('loaded!');
 });
