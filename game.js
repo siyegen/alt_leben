@@ -86,10 +86,11 @@ Q.Sprite.extend("Player",{
     });
     //Q.input.on("fire", this, "fireWeapon");
     this.on("step", function() {
+      console.log(Q.inputs.p);
       if(Q.inputs.fire) {
-        this.trigger("fireWeapon", "");
         this.fireWeapon();
       }
+      //if(Q.in
     });
   },
   step: function(dt) {
@@ -99,7 +100,6 @@ Q.Sprite.extend("Player",{
   },
   fireWeapon: function() {
     var stage = Q.stage();
-    console.log('pew');
     stage.insert(new Q.Pew({ x: this.p.x+40, y: this.p.y, player_vx: this.p.vx}));
   }
 });

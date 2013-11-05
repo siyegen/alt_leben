@@ -20,3 +20,12 @@ Left does nothing, you shouldn't try to go back.
 
 ### Try it out?
 http://siyegen.github.io/alt_leben/
+
+### TODO
++ Winning Conditions
++ Better Enemy movement
++ Longer level
+  + Level generator
++ Better Controls
++ Multiple weapons
++ Custom Sprites
