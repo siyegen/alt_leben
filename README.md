@@ -23,6 +23,7 @@ http://siyegen.github.io/alt_leben/
 
 ### TODO
 + ~~Winning Conditions~~
++ Pause game
 + Better Enemy movement
 + Longer level
   + Level generator
