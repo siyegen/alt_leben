@@ -11,7 +11,7 @@ Q.gravityY = 0;
 Q.component("drtControls", {
   defaults: {
     speed: 200,
-    kyle_speed: 300,
+    boost_speed: 300,
     min_speed: 100,
     break_speed: 50
   },
@@ -32,7 +32,7 @@ Q.component("drtControls", {
 
     if(Q.inputs.right) {
       p.direction = 'right';
-      p.vx = p.kyle_speed;
+      p.vx = p.boost_speed;
     } if(Q.inputs.left) {
       //p.direction = 'left';
       p.vx = p.vx-p.break_speed;
@@ -79,14 +79,13 @@ Q.Sprite.extend("Player",{
     this.p.collisionMask = (Q.SPRITE_DEFAULT | Q.SPRITE_ACTIVE | Q.SPRITE_ENEMY);
 
     this.on("hit.sprite",function(collision) {
-      if(collision.obj.isA("Tower")) {
+      console.log(collision);
+      if(collision.obj.isA("Goal")) {
         Q.stageScene("endGame",1, { label: "You Won!" }); 
         this.destroy();
       }
     });
-    //Q.input.on("fire", this, "fireWeapon");
     this.on("step", function() {
-      console.log(Q.inputs.p);
       if(Q.inputs.fire) {
         this.fireWeapon();
       }
@@ -94,7 +93,6 @@ Q.Sprite.extend("Player",{
     });
   },
   step: function(dt) {
-    //console.log(this.p.vx);
     this.p.vx += 0.15;
     this.p.x += this.p.vx * dt;
   },
@@ -104,9 +102,9 @@ Q.Sprite.extend("Player",{
   }
 });
 
-Q.Sprite.extend("Tower", {
+Q.Sprite.extend("Goal", {
   init: function(p) {
-    this._super(p, { sheet: 'tower' });
+    this._super(p, { sheet: 'goal' });
   }
 });
 
@@ -117,7 +115,7 @@ Q.Sprite.extend("Enemy",{
     this.add('2d, aiBounce');
 
     this.on("bump.left,bump.right,bump.bottom,bump.top",function(collision) {
-      if(collision.obj.isA("Player")) { 
+      if(collision.obj.isA("Player")) {
         Q.stageScene("endGame",1, { label: "You Died" }); 
         collision.obj.destroy();
       }
@@ -130,7 +128,18 @@ Q.Sprite.extend("Enemy",{
 });
 
 Q.scene("level1",function(stage) {
-  stage.collisionLayer(new Q.TileLayer({ dataAsset: 'kyle_level.json', sheet: 'tiles' }));
+  var tiles = new Q.TileLayer({ dataAsset: 'game_level.json', sheet: 'tiles' });
+  stage.collisionLayer(tiles);
+
+  // Hacky!
+  var goal_width = 30;
+  var goal_height = 30;
+  var goal_line_x = tiles.p.w - ((goal_width / 2)+goal_width);
+  var line_y = (goal_height / 2) + goal_height;
+  for(var c=0; c < 25; c ++) {
+    stage.insert(new Q.Goal({x: goal_line_x, y:line_y}));
+    line_y += goal_height;
+  }
 
   for(var i=0; i < 50; i++) {
     stage.insert(new Q.Enemy({ x: 600+i+95, y: 100+i+90, vx: 200*Math.random()}));
@@ -160,9 +169,9 @@ Q.scene('endGame',function(stage) {
   box.fit(20);
 });
 
-Q.load("kyle_sprites.png, sprites.json, kyle_level.json, tiles.png", function() {
+Q.load("game_sprites.png, sprites.json, game_level.json, tiles.png", function() {
   Q.sheet("tiles","tiles.png", { tilew: 32, tileh: 32 });
-  Q.compileSheets("kyle_sprites.png","sprites.json");
+  Q.compileSheets("game_sprites.png","sprites.json");
   Q.stageScene("level1");
   console.log('loaded!');
 });

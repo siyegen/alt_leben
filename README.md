@@ -22,7 +22,7 @@ Left does nothing, you shouldn't try to go back.
 http://siyegen.github.io/alt_leben/
 
 ### TODO
-+ Winning Conditions
++ ~~Winning Conditions~~
 + Better Enemy movement
 + Longer level
   + Level generator
